@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace HtmlDocParser.Config
+namespace Cosmo.HtmlDocParser.Config
 {
     public class DebugHtmlConfig : IHtmlConfig
     {

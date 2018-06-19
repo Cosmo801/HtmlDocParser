@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace HtmlDocParser.Config
+﻿namespace Cosmo.HtmlDocParser.Config
 {
     public interface IHtmlConfig
     {
