@@ -20,7 +20,7 @@ namespace HtmlDocParser.Sample
             //apple works
             var test = reader.ParseDocument("https://www.apple.com/au/");
 
-            var links = test.GetElementBySelector("html , title");
+            var links = test.GetElementBySelector("html ,title");
            
         }
     }
