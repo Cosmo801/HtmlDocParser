@@ -56,8 +56,6 @@ namespace Cosmo.HtmlDocParser.Parser.Helpers
         {
             return _config.IsEmptyElement(element);
         }
-
-
         
         public static IEnumerable<HtmlElement> GetAllElements(HtmlDocument source)
         {
@@ -140,7 +138,7 @@ namespace Cosmo.HtmlDocParser.Parser.Helpers
 
         public static string RemoveEscapeCharacters(string text)
         {
-            var escapes = new string[] { "\\", "\n", "\r"};
+            var escapes = new string[] { "\\", "\n", "\r", "\t"};
 
             foreach(var escape in escapes)
             {              

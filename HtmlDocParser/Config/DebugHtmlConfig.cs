@@ -4,6 +4,9 @@ namespace Cosmo.HtmlDocParser.Config
 {
     public class DebugHtmlConfig : IHtmlConfig
     {
+        //Make this better
+
+
         public bool IsHtmlElement(string elementName)
         {
             if (GetAvailableElements().Contains(elementName)) return true;
@@ -12,8 +15,16 @@ namespace Cosmo.HtmlDocParser.Config
 
         public bool IsEmptyElement(string elementName)
         {
-            if (GetEmptyElements().Contains(elementName)) return true;
+
+            var emptyElements = new List<string>()
+            {
+                "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"
+            };
+
+            if (emptyElements.Contains(elementName)) return true;
+
             return false;
+
         }
 
         private List<string> GetAvailableElements()
@@ -137,15 +148,7 @@ namespace Cosmo.HtmlDocParser.Config
             };
         }
 
-        private List<string> GetEmptyElements()
-        {
-            return new List<string>
-            {
-                "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"
 
-
-
-            };
-        }
+       
     }
 }

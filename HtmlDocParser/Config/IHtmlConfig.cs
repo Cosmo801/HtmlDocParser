@@ -4,6 +4,7 @@
     {
         bool IsHtmlElement(string elementName);
         bool IsEmptyElement(string elementName);
+        
 
     }
 }

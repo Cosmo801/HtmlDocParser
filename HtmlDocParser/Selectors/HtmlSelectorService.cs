@@ -15,10 +15,7 @@ namespace Cosmo.HtmlDocParser.Selectors
             
         }
 
-        private IHtmlConfig _htmlConfig;
-     
-
-       
+        private IHtmlConfig _htmlConfig;  
 
         public IEnumerable<HtmlElement> GetElement(HtmlDocument source, string element)
         {
@@ -68,6 +65,8 @@ namespace Cosmo.HtmlDocParser.Selectors
         public IEnumerable<HtmlElement> GetElementBySelector(HtmlDocument source, string selectorString)
         {
 
+            //Fix this for invalid spacing etc
+
             if (source == null) throw new ArgumentNullException();
             if (selectorString == null) throw new ArgumentNullException();
 
@@ -84,9 +83,7 @@ namespace Cosmo.HtmlDocParser.Selectors
             
            
 
-        }
-
-        
+        }       
 
         private bool IsSelectorPattern(string leftSide, string rightSide)
         {

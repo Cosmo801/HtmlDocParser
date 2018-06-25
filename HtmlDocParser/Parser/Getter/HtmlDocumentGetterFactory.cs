@@ -1,15 +1,20 @@
 ﻿using System;
+using System.IO;
 
 namespace Cosmo.HtmlDocParser.Parser.Getter
 {
     public class HtmlDocumentGetterFactory
     {
+        //Make is valid web address more tolerant
+
 
         public static IHtmlDocumentGetter GetDocumentGetter(string path)
         {
+            if (IsFile(path)) return new FileHtmlDocumentGetter(path);
             if (IsValidWebAddress(path)) return new WebHtmlDocumentGetter(path);
 
-            return new FileHtmlDocumentGetter(path);
+            throw new ArgumentException("HTML file not found, if you are using a web address please include the full address incuding http");
+
         }
 
         private static bool IsValidWebAddress(string path)
@@ -20,6 +25,11 @@ namespace Cosmo.HtmlDocParser.Parser.Getter
 
             return result;
 
+        }
+
+        private static bool IsFile(string path)
+        {
+            return File.Exists(path);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Cosmo.HtmlDocParser.Parser.Html
         public HtmlDocumentReader()
         {
 
-            _elementReader = new NewElementReader();
+            _elementReader = new HtmlElementReader();
         }
 
         public HtmlDocument ParseDocument(string path)

@@ -12,7 +12,6 @@ namespace Cosmo.HtmlDocParser.Parser.Getter
             _path = path;
         }
 
-
         public string GetHtml()
         {
             return GetHtmlAsync().Result;

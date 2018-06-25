@@ -1,4 +1,5 @@
-﻿using Cosmo.HtmlDocParser.Parser.Helpers;
+﻿
+using Cosmo.HtmlDocParser.Parser.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,226 +15,243 @@ namespace Cosmo.HtmlDocParser.Parser.Html
             _attributeReader = new HtmlAttributeReader();
         }
 
-       
-        public HtmlElement GetElement(string text)
+        private HtmlElementGetResult GetElementResult(string text)
         {
-            if (GetSelfClosingElement(text).Count() == 1) return GetSelfClosingElement(text).First();
-            if (GetEmptyElement(text).Count() == 1) return GetEmptyElement(text).First();
-
-            var opening = GetElementOpening(text);
-            if (!opening.Success) return null;
-
-            var closing = GetElementClosing(text, opening);
-            if (!closing.Success) return null;
-
-            var innerText = new string(text.Skip(opening.OpeningTagCloseIndex + 1)
-                                          .Take((closing.CloseTagOpenIndex - 1) - (opening.OpeningTagCloseIndex))
-                                          .ToArray());
-
-
-            var element = new HtmlElement(opening.ElementName, innerText)
+            var empty = GetEmptyElement(text);
+            if(empty.Count() == 1)
             {
-                DocumentStartIndex = opening.OpeningTagOpenIndex,
-                DocumentEndIndex = closing.CloseTagCloseIndex,
-                
-                Children = new List<HtmlElement>()
+                var emptyEle = empty.First();
+                var parsedParentText = text.Remove(emptyEle.DocumentStartIndex, emptyEle.DocumentEndIndex - emptyEle.DocumentStartIndex);
+                return new HtmlElementGetResult { Success = true, Element = emptyEle, ParsedParentText = parsedParentText };
+            }
+
+            var selfClosing = GetSelfClosingElement(text);
+            if(selfClosing.Count() == 1)
+            {
+                var closeEle = selfClosing.First();
+                var parsedParentText = text.Remove(closeEle.DocumentStartIndex, closeEle.DocumentEndIndex - closeEle.DocumentStartIndex);
+                return new HtmlElementGetResult { Success = true, Element = closeEle, ParsedParentText = parsedParentText };
+            }
+
+            var openResult = GetElementOpening(text);
+            if (openResult.Success == false) return new HtmlElementGetResult { Success = false, ParsedParentText = text };
+
+            if (HtmlHelpers.IsHtmlElement(openResult.ElementName) == false) return GetElementResult(text.Remove(openResult.OpeningTagOpenIndex, openResult.OpeningTagCloseIndex - openResult.OpeningTagOpenIndex + 1));
+
+            //not taking enough on some substring
+
+            var closeResult = GetElementClosing(text, openResult);
+            if(closeResult.Success == false)
+            {
+                var parsedText = text.Remove(openResult.OpeningTagOpenIndex, openResult.OpeningTagCloseIndex - openResult.OpeningTagOpenIndex);
+                return new HtmlElementGetResult { Success = false, ParsedParentText = parsedText };
+            }
+
+            var elementText = text.Substring(openResult.OpeningTagOpenIndex + 1, openResult.OpeningTagCloseIndex - (openResult.OpeningTagOpenIndex + 1));
+            var innerText = text.Substring(openResult.OpeningTagCloseIndex + 1, closeResult.CloseTagOpenIndex - (openResult.OpeningTagCloseIndex + 1));
+
+            var element = new HtmlElement
+            {
+                ElementName = openResult.ElementName,
+                DocumentStartIndex = openResult.OpeningTagOpenIndex,
+                DocumentEndIndex = closeResult.CloseTagCloseIndex,
+                InnerText = innerText,
+                Attributes = new Dictionary<string, List<string>>()
             };
 
-           
             GetChildren(element);
-           
+            _attributeReader.GetAttributes(element, elementText);
 
-            var attrString = text.Substring(opening.OpeningTagOpenIndex + 1, opening.OpeningTagCloseIndex - (opening.OpeningTagOpenIndex + 1));
-            _attributeReader.GetAttributes(element, attrString);
+            return new HtmlElementGetResult
+            {
+                Success = true,
+                Element = element,
+                ParsedParentText = text.Remove(element.DocumentStartIndex, element.DocumentEndIndex - element.DocumentStartIndex)
+            };
 
-            element.InnerTextParsed = HtmlHelpers.RemoveEscapeCharacters(element.InnerText);
-
-            return element;
+        }
 
 
+
+        public HtmlElement GetElement(string text)
+        {
+            var result = GetElementResult(text);
+
+            if (result.Success == false) return null;
+
+            return result.Element;
+
+    
 
         }
 
         private void GetChildren(HtmlElement element)
         {
-            //this method is causing issues change has Children
+            element.Children = new List<HtmlElement>();
             var innerTextSave = element.InnerText;
-            while (HasChildren(innerTextSave))
+
+
+            while (true)
             {
-                var child = GetElement(innerTextSave);
-                innerTextSave = innerTextSave.Substring(child.DocumentEndIndex);
+                if (HasChildren(element) == false) break;
 
-                if (child.Parent == null)
-                {
-                    child.Parent = element;
-                }
-                else ((IList<HtmlElement>)child.Parent).Add(element);
+                var elementResult = GetElementResult(element.InnerText);
+                element.InnerText = elementResult.ParsedParentText;
 
-                if (element.Children == null)
+                if (elementResult.Success)
                 {
-                    element.Children = new List<HtmlElement> { child };
+                    ((List<HtmlElement>)element.Children).Add(elementResult.Element);
+                    elementResult.Element.Parent = element;
                 }
-                else ((IList<HtmlElement>)element.Children).Add(child);
+
 
 
             }
+
+            element.InnerText = innerTextSave;
+            element.InnerTextParsed = HtmlHelpers.RemoveEscapeCharacters(innerTextSave);
+
+
         }
 
-        private bool HasChildren(string text)
+        private bool HasChildren(HtmlElement element)
         {
-          
+            if (GetEmptyElement(element.InnerText).Count() == 1) return true;
+            if (GetSelfClosingElement(element.InnerText).Count() == 1) return true;
 
-            if (GetEmptyElement(text).Count() == 1) return true;
-            if (GetSelfClosingElement(text).Count() == 1) return true;
-
-            var openResult = GetElementOpening(text);
+            var openResult = GetElementOpening(element.InnerText);
             if (openResult.Success == false) return false;
 
-            var close = GetElementClosing(text, openResult);
-            if (close.Success == false) return false;
+            var closeResult = GetElementClosing(element.InnerText, openResult);
+            if (closeResult.Success == false) return false;
 
             return true;
+        }
+
+        private Maybe<HtmlElement> GetEmptyElement(string text)
+        {
+            if (text == null) return new Maybe<HtmlElement>();
+        
+
+            var openMatch = new Regex("<").Match(text);
+            if (openMatch.Success == false) return new Maybe<HtmlElement>();
+
+            var elementName = text.Skip(openMatch.Index + 1).TakeWhile(c => c != ' ').CharsToString();
+
+            if (!HtmlHelpers.IsEmptyElement(elementName)) return new Maybe<HtmlElement>();
+
+            var closeMatch = new Regex(">").Match(text.Skip(openMatch.Index).CharsToString());
+            if (closeMatch.Success == false) return new Maybe<HtmlElement>();
+
+            var elementText = text.Substring(openMatch.Index + 1, (closeMatch.Index + openMatch.Index) - (openMatch.Index + 2))
+                                  .Skip(elementName.Count())
+                                  .CharsToString();
+
+            var element = new HtmlElement
+            {
+                ElementName = elementName,
+                DocumentStartIndex = openMatch.Index,
+                DocumentEndIndex = closeMatch.Index + openMatch.Index + 1
+
+            };
+
+            _attributeReader.GetAttributes(element, elementText);
+
+            return new Maybe<HtmlElement>(element);
+
+        }
+
+        private Maybe<HtmlElement> GetSelfClosingElement(string text)
+        {
+            if (text == null) return new Maybe<HtmlElement>();
+
+
+            var openMatch = new Regex("<").Match(text);
+            if (openMatch.Success == false) return new Maybe<HtmlElement>();
+
+            var elementName = text.Skip(openMatch.Index + 1).TakeWhile(c => c != ' ').CharsToString();
+
+            var closeMatch = new Regex("/>").Match(text);
+            if (closeMatch.Success == false) return new Maybe<HtmlElement>();
+
+            var elementText = text.Substring(openMatch.Index + 1, closeMatch.Index - (openMatch.Index + 2))
+                                  .Skip(elementName.Count())
+                                  .CharsToString();
+
+            var element = new HtmlElement
+            {
+                ElementName = elementName,
+                DocumentStartIndex = openMatch.Index,
+                DocumentEndIndex = closeMatch.Index + closeMatch.Length
+
+            };
+
+            _attributeReader.GetAttributes(element, elementText);
+
+            return new Maybe<HtmlElement>();
 
         }
 
         private HtmlElementOpenGetResult GetElementOpening(string text)
         {
-            var openPatternOne = new Regex("<");
-            var openPatternTwo = new Regex(">");
+            var openMatch = new Regex("<").Match(text);
+            if (openMatch.Success == false) return new HtmlElementOpenGetResult { Success = false };
+            
 
-            //this is screwing up with links
-            var openMatchOne = openPatternOne.Match(text);
-            var openMatchTwo = openPatternTwo.Match(text);
+            //error occurs here we need one more space taken
+            var closeMatch = new Regex(">").Match(text);
+            if (closeMatch.Success == false) return new HtmlElementOpenGetResult { Success = false };
+            //Fix < in text string
 
-            if (!openMatchOne.Success) return new HtmlElementOpenGetResult { Success = false };
-            if (!openMatchTwo.Success) return new HtmlElementOpenGetResult { Success = false };
+            var elementName = text.Substring(openMatch.Index + 1, closeMatch.Index - (openMatch.Index + 1))
+                                  .TakeWhile(c => c != ' ')
+                                  .CharsToString();
 
-            //Is !DOCTYPE
-            if (text[openMatchOne.Index + 1] == '!')
-            {
-
-                openMatchOne = openMatchOne.NextMatch();
-                openMatchTwo = openMatchTwo.NextMatch();
-
-                if (openMatchOne.Success == false) return new HtmlElementOpenGetResult { Success = false };
-
-
-            }
-
-            var openIndexCount = (openMatchTwo.Index - 1) - (openMatchOne.Index);
-            var openingTag = text.Substring(openMatchOne.Index + 1, openIndexCount);
-
-            var htmlName = openingTag.Split(null).Where(o => o != string.Empty).First();
-
-
+            
 
             return new HtmlElementOpenGetResult
             {
-                ElementName = htmlName,
                 Success = true,
-                OpeningTagOpenIndex = openMatchOne.Index,
-                OpeningTagCloseIndex = openMatchTwo.Index
+                ElementName = elementName,
+                OpeningTagOpenIndex = openMatch.Index,
+                OpeningTagCloseIndex = closeMatch.Index
             };
 
-           
         }
 
-        private HtmlElementCloseGetResult GetElementClosing(string text, HtmlElementOpenGetResult open)
+        private HtmlElementCloseGetResult GetElementClosing(string text, HtmlElementOpenGetResult opening)
         {
-            var searchString = $@"</{open.ElementName}>";
+            //get the corresponding closing somehow
 
-            var closeRegex = new Regex(searchString);
+            var closingMatches = new Regex($"</{opening.ElementName}>").Matches(text);
+            var childOpenMatches = new Regex($"<{opening.ElementName}").Matches(text.Skip(opening.OpeningTagOpenIndex + 1).CharsToString());
 
-            var matches = closeRegex.Matches(text);
-            Match lastMatch;
-
-            if (matches.Count == 0) return new HtmlElementCloseGetResult { Success = false };
-            else if (matches.Count > 1)
+            if (closingMatches.Count == 0) return new HtmlElementCloseGetResult { Success = false };
+            if (childOpenMatches.Count == 0) return new HtmlElementCloseGetResult
             {
-                lastMatch = matches[matches.Count - 1];
-            }
-            else lastMatch = matches[0];
+                ElementName = opening.ElementName,
+                Success = true,
+                CloseTagOpenIndex = closingMatches[0].Index,
+                CloseTagCloseIndex = closingMatches[0].Index + closingMatches[0].Length
+            };
+
+            //invalid html will error here
+            var finalCloseMatch = closingMatches[childOpenMatches.Count - 1];
+
 
             return new HtmlElementCloseGetResult
             {
-                ElementName = open.ElementName,
+                ElementName = opening.ElementName,
                 Success = true,
-                CloseTagOpenIndex = lastMatch.Index,
-                CloseTagCloseIndex = lastMatch.Index + lastMatch.Length
-            };
-        }
+                CloseTagOpenIndex = finalCloseMatch.Index,
+                CloseTagCloseIndex = finalCloseMatch.Index + finalCloseMatch.Length
 
-        private Maybe<HtmlElement> GetSelfClosingElement(string text)
-        {
-
-            //This is causing problems with links could be the indexing
-            var openFinder = new Regex("<");
-            var closeFinder = new Regex("/>");
-
-            var openingMatch = openFinder.Match(text);
-            if (!openingMatch.Success) return new Maybe<HtmlElement>();
-
-            var closeMatch = closeFinder.Match(text);
-            if (!closeMatch.Success) return new Maybe<HtmlElement>();
-
-            var invalidOpening = new Regex(">").Match(text);
-            var invalidClosing = new Regex("</").Match(text);
-
-            if (invalidOpening.Success)
-            {
-                if (invalidOpening.Index > openingMatch.Index && invalidOpening.Index < closeMatch.Index) return new Maybe<HtmlElement>();
-            }
-            if (invalidClosing.Success)
-            {
-                if (invalidClosing.Index > openingMatch.Index && invalidClosing.Index < closeMatch.Index) return new Maybe<HtmlElement>();
-            }
-
-            var elementText = text.Remove(openingMatch.Index + 1, closeMatch.Index - (openingMatch.Index + 1));
-            var elementTextArray = elementText.Split(null);
-
-            var elementName = elementTextArray.First();
-            if (!HtmlHelpers.IsHtmlElement(elementName)) return new Maybe<HtmlElement>();
-                    
-            var element = new HtmlElement
-            {
-                ElementName = elementName,
-                DocumentStartIndex = openingMatch.Index,
-                DocumentEndIndex = closeMatch.Index + 1,
-                Children = new List<HtmlElement>(),
-                InnerText = string.Empty,
-                InnerTextParsed = string.Empty
             };
 
-            _attributeReader.GetAttributes(element, text.Substring(openingMatch.Index + 1, closeMatch.Index - (openingMatch.Index + 2)));
 
-            return new Maybe<HtmlElement>(element);
+
+
+
         }
-
-        private Maybe<HtmlElement> GetEmptyElement(string text)
-        {
-            var elementResult = GetElementOpening(text);
-            if (!elementResult.Success) return new Maybe<HtmlElement>();
-
-            if (!HtmlHelpers.IsEmptyElement(elementResult.ElementName)) return new Maybe<HtmlElement>();
-
-            var newElement = new HtmlElement
-            {
-                ElementName = elementResult.ElementName,
-                DocumentStartIndex = elementResult.OpeningTagOpenIndex,
-                DocumentEndIndex = elementResult.OpeningTagCloseIndex,
-                Children = new List<HtmlElement>(),
-                InnerText = string.Empty,
-                InnerTextParsed = string.Empty
-                
-            };
-
-            var attributeString = text.Substring(newElement.DocumentStartIndex + 1, newElement.DocumentEndIndex - (newElement.DocumentStartIndex + 1));
-            _attributeReader.GetAttributes(newElement, attributeString);
-          
-
-            return new Maybe<HtmlElement>(newElement);
-        }
-
-
     }
 }

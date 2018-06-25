@@ -13,13 +13,14 @@ namespace HtmlDocParser.Sample
 
             //Add exception handling to Getter
 
+            //Do multi selectors
 
             var reader = new HtmlDocumentReader();
 
-            //apple still doesnt work
-            var test = reader.ParseDocument("https://www.apple.com");
+            //apple works
+            var test = reader.ParseDocument("https://www.apple.com/au/");
 
-            var links = test.GetElementBySelector("link");
+            var links = test.GetElementBySelector("html , title");
            
         }
     }

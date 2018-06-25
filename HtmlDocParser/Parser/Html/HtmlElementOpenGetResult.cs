@@ -8,8 +8,5 @@
         public int OpeningTagCloseIndex { get; set; }
 
 
-        
-
-
     }
 }
