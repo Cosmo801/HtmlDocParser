@@ -1,4 +1,5 @@
 ﻿using Cosmo.HtmlDocParser.Parser.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -46,10 +47,41 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
                                 
             }
 
-            return null;
+            return SelectWithWildCard(allElements);
+
+
+           
 
 
 
+        }
+
+        private IEnumerable<HtmlElement> SelectWithWildCard(IEnumerable<HtmlElement> allElements)
+        {
+            var attrElements = allElements.Where(e => e.Attributes.ContainsKey(_attrName));
+
+
+            //fix this to only work with whole words
+            if(_wildCard == '|')
+            {
+                return attrElements.Where(e => e.Attributes[_attrName].ToString().StartsWith(_attrValue));
+                                  
+            }
+            if (_wildCard == '^')
+            {
+                return attrElements.Where(e => e.Attributes[_attrName].ToString().StartsWith(_attrValue));
+
+            }
+            if (_wildCard == '$')
+            {
+                return attrElements.Where(e => e.Attributes[_attrName].ToString().EndsWith(_attrValue));
+            }
+            if(_wildCard == '*')
+            {
+                return attrElements.Where(e => e.Attributes[_attrName].Contains(_attrValue));
+            }
+
+            return attrElements;
         }
 
         public IEnumerable<HtmlElement> SelectElements(IEnumerable<HtmlElement> source)

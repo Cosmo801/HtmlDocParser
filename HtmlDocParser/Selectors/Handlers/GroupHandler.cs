@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Cosmo.HtmlDocParser.Selectors.Handlers
 {
-    public class GroupHandler : CombinatorSelectorHandler
+    public class GroupHandler : HandlerBase
     {
         public override ISelector GetSelector(string[] selectorString)
         {

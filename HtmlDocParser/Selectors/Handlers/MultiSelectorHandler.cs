@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace Cosmo.HtmlDocParser.Selectors.Handlers
 {
-    public class MultiSelectorHandler : ISelectorHandler
+    public class MultiSelectorHandler : HandlerBase
     {
         protected ISelectorHandler NextHandler { get; private set; }
 
-        public ISelector GetSelector(string[] selectorString)
+        public override ISelector GetSelector(string[] selectorString)
         {
             if(selectorString.Count() > 2) return new MultiSelector(selectorString);
 

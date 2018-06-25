@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Cosmo.HtmlDocParser.Selectors.Handlers
 {
-    public class ElementHandler : SingleSelectorHandler
+    public class ElementHandler : HandlerBase
     {
         public override ISelector GetSelector(string[] selectorString)
         {

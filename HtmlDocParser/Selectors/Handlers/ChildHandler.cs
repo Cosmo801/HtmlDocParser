@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Cosmo.HtmlDocParser.Selectors.Handlers
 {
-    public class ChildHandler : CombinatorSelectorHandler
+    public class ChildHandler : HandlerBase 
     {
         public override ISelector GetSelector(string[] selectorString)
         {

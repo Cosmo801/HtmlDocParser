@@ -67,10 +67,6 @@ namespace Cosmo.HtmlDocParser.Selectors
         public IEnumerable<HtmlElement> GetElementBySelector(HtmlDocument source, string selectorString)
         {
 
-            //Fix this for invalid spacing etc
-
-
-
             if (source == null) throw new ArgumentNullException();
             if (selectorString == null) throw new ArgumentNullException();
 
