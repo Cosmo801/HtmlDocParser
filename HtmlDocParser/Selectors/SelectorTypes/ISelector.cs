@@ -4,9 +4,7 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
 {
     public interface ISelector
     {
-        IEnumerable<HtmlElement> SelectElements(HtmlDocument doc);
         IEnumerable<HtmlElement> SelectElements(IEnumerable<HtmlElement> source);
-
 
     }
 }

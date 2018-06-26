@@ -8,6 +8,11 @@ namespace HtmlDocParser.Sample
         static void Main(string[] args)
         {
  
+            //Fix spacing for tags 
+            //eg < div> </div >
+
+
+
             //fix commenting
             //need to add better exception resistance
 
@@ -17,8 +22,10 @@ namespace HtmlDocParser.Sample
 
             var reader = new HtmlDocumentReader();
 
+            //multi selectors are doing repeated calls to HtmlHelpers.GetAllElements() fix it
+
             //apple works
-            var test = reader.ParseDocument("https://www.apple.com/au/");
+            var test = reader.ParseDocumentFromPath("https://www.apple.com/au/");
 
             var links = test.GetElementBySelector("head > title");
            

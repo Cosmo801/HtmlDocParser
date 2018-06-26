@@ -13,13 +13,7 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
             _id = id;
         }
 
-        public IEnumerable<HtmlElement> SelectElements(HtmlDocument doc)
-        {
-            var allElements = HtmlHelpers.GetAllElements(doc);
-
-            return allElements.Where(e => e.Attributes.ContainsKey("id"))
-                              .Where(e => e.Attributes["id"].Contains(_id));
-        }
+  
 
         public IEnumerable<HtmlElement> SelectElements(IEnumerable<HtmlElement> source)
         {

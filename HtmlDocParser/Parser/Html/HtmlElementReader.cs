@@ -71,8 +71,6 @@ namespace Cosmo.HtmlDocParser.Parser.Html
 
         }
 
-
-
         public HtmlElement GetElement(string text)
         {
             var result = GetElementResult(text);
@@ -222,6 +220,8 @@ namespace Cosmo.HtmlDocParser.Parser.Html
         private HtmlElementCloseGetResult GetElementClosing(string text, HtmlElementOpenGetResult opening)
         {
             //get the corresponding closing somehow
+
+            
 
             var closingMatches = new Regex($"</{opening.ElementName}>").Matches(text);
             var childOpenMatches = new Regex($"<{opening.ElementName}").Matches(text.Skip(opening.OpeningTagOpenIndex + 1).CharsToString());

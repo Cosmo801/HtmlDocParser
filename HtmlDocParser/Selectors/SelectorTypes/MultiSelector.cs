@@ -15,20 +15,12 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
         }
 
 
-        public IEnumerable<HtmlElement> SelectElements(HtmlDocument doc)
-        {
-           
-            var elements = HtmlHelpers.GetAllElements(doc);
-            return SelectElements(elements);
-            
-
-            
-        }
-
         private IEnumerable<ISelector> GetSelectors(string[] selectors)
         {
             var handlers = HandlerFactory.GetHandlers();
             var selectorObjs = new List<ISelector>();
+
+
 
             for (int i = 0; i < selectors.Length; i++)
             {
@@ -65,6 +57,7 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
 
         public IEnumerable<HtmlElement> SelectElements(IEnumerable<HtmlElement> source)
         {
+            
             var selectors = GetSelectors(_selectors);
             foreach (var selector in selectors)
             {

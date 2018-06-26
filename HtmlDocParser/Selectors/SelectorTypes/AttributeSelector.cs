@@ -31,27 +31,23 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
             _wildCard = wildCard;
         }
 
-        public IEnumerable<HtmlElement> SelectElements(HtmlDocument doc)
+        public IEnumerable<HtmlElement> SelectElements(IEnumerable<HtmlElement> source)
         {
-            var allElements = HtmlHelpers.GetAllElements(doc);
+           
 
             if (string.IsNullOrEmpty(_attrValue))
             {
-                return allElements.Where(e => e.Attributes.ContainsKey(_attrName));
+                return source.Where(e => e.Attributes.ContainsKey(_attrName));
             }
 
             if (char.IsWhiteSpace(_wildCard))
             {
-                return allElements.Where(e => e.Attributes.ContainsKey(_attrName))
+                return source.Where(e => e.Attributes.ContainsKey(_attrName))
                                   .Where(e => e.Attributes[_attrName].Contains(_attrValue));
                                 
             }
 
-            return SelectWithWildCard(allElements);
-
-
-           
-
+            return SelectWithWildCard(source);
 
 
         }
@@ -84,11 +80,7 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
             return attrElements;
         }
 
-        public IEnumerable<HtmlElement> SelectElements(IEnumerable<HtmlElement> source)
-        {
-            return SelectElements(new HtmlDocument { RootElements = source.ToList() });
-        }
-
+     
 
 
 

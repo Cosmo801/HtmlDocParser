@@ -1,6 +1,6 @@
 ﻿namespace Cosmo.HtmlDocParser.Parser.Html
 {
-    public class HtmlElementCloseGetResult
+    internal class HtmlElementCloseGetResult
     {
         public bool Success { get; set; }
         public string ElementName { get; set; }

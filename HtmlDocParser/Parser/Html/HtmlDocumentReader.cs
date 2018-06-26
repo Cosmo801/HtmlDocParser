@@ -9,34 +9,34 @@ namespace Cosmo.HtmlDocParser.Parser.Html
 
         public HtmlDocumentReader()
         {
-
             _elementReader = new HtmlElementReader();
         }
 
-        public HtmlDocument ParseDocument(string path)
+        public IEnumerable<HtmlElement> ParseDocumentFromPath(string path)
         {
-            var docString = HtmlDocumentGetterFactory.GetDocumentGetter(path).GetHtml();
-            var rootElements = new List<HtmlElement>();
-            
+            var htmlText = HtmlDocumentGetterFactory.GetDocumentGetter(path).GetHtml();
+            return ParseDocumentFromRawHtml(htmlText);
+        }
+
+        public IEnumerable<HtmlElement> ParseDocumentFromRawHtml(string html)
+        {
+            var elementList = new List<HtmlElement>();
+
 
             while (true)
             {
-                var element = _elementReader.GetElement(docString);
-                if (element == null) break;
+                var currentElement = _elementReader.GetElement(html);
+                if (currentElement == null) break;
 
-                docString = docString.Remove(element.DocumentStartIndex, element.DocumentEndIndex - element.DocumentStartIndex);
+                elementList.Add(currentElement);
 
-                rootElements.Add(element);
-
+                html = html.Remove(currentElement.DocumentStartIndex, currentElement.DocumentEndIndex - currentElement.DocumentStartIndex);
             }
 
-            return new HtmlDocument
-            {
-                RootElements = rootElements
-            };
+            return elementList;
         }
 
-
+     
            
 
         

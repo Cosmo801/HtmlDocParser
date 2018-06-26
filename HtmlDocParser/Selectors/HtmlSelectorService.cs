@@ -19,7 +19,7 @@ namespace Cosmo.HtmlDocParser.Selectors
 
         private IHtmlConfig _htmlConfig;  
 
-        public IEnumerable<HtmlElement> GetElement(HtmlDocument source, string element)
+        public IEnumerable<HtmlElement> GetElement(IEnumerable<HtmlElement> source, string element)
         {
             if (source == null) throw new ArgumentException(nameof(HtmlElement));
             if (!_htmlConfig.IsHtmlElement(element)) throw new ArgumentException("element is invalid");
@@ -30,7 +30,7 @@ namespace Cosmo.HtmlDocParser.Selectors
 
         }
 
-        public IEnumerable<HtmlElement> GetElementByClass(HtmlDocument source, string className)
+        public IEnumerable<HtmlElement> GetElementByClass(IEnumerable<HtmlElement> source, string className)
         {
             if (source == null) throw new ArgumentException(nameof(HtmlElement));
 
@@ -49,7 +49,7 @@ namespace Cosmo.HtmlDocParser.Selectors
             return selectedElements;
         }
 
-        public Maybe<HtmlElement> GetElementById(HtmlDocument source, string id)
+        public Maybe<HtmlElement> GetElementById(IEnumerable<HtmlElement> source, string id)
         {
             if (source == null) throw new ArgumentException(nameof(HtmlElement));
 
@@ -64,7 +64,7 @@ namespace Cosmo.HtmlDocParser.Selectors
             return new Maybe<HtmlElement>();
         }
 
-        public IEnumerable<HtmlElement> GetElementBySelector(HtmlDocument source, string selectorString)
+        public IEnumerable<HtmlElement> GetElementBySelector(IEnumerable<HtmlElement> source, string selectorString)
         {
 
             if (source == null) throw new ArgumentNullException();

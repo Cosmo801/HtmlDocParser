@@ -15,19 +15,13 @@ namespace Cosmo.HtmlDocParser.Selectors.SelectorTypes
             _rightSide = rightSide;
         }
 
-        public IEnumerable<HtmlElement> SelectElements(HtmlDocument doc)
-        {
-            var allElements = HtmlHelpers.GetAllElements(doc);
-
-            return SelectElements(allElements);
-
-         
-            
-        }
+      
 
         public IEnumerable<HtmlElement> SelectElements(IEnumerable<HtmlElement> source)
         {
             //fix this
+
+
 
             var handlers = HandlerFactory.GetHandlers();
             var leftSelector = handlers.GetSelector(new string[] { _leftSide });

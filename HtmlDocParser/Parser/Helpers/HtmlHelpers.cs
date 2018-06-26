@@ -56,29 +56,10 @@ namespace Cosmo.HtmlDocParser.Parser.Helpers
         {
             return _config.IsEmptyElement(element);
         }
-        
-        public static IEnumerable<HtmlElement> GetAllElements(HtmlDocument source)
-        {
-            //doesnt work
-
-            if (source == null) throw new ArgumentNullException(nameof(HtmlDocument));
-
-            var eleList = new List<HtmlElement>();       
-            if (source.RootElements.Count() == 0) return eleList;
-
-            foreach(var element in source.RootElements)
-            {
-                var allElements = GetElementAndDescendents(element);
-                eleList.AddRange(allElements);
-            }
-
-            return eleList;
-
-        }
-
+      
         public static IEnumerable<HtmlElement> GetElementAndDescendents(HtmlElement source)
         {
-            if (source == null) throw new ArgumentNullException(nameof(HtmlDocument));
+            if (source == null) throw new ArgumentNullException(nameof(HtmlElement));
            
 
             var eleList = new List<HtmlElement> { source };
@@ -94,6 +75,24 @@ namespace Cosmo.HtmlDocParser.Parser.Helpers
 
             return eleList;
 
+        }
+
+        public static IEnumerable<HtmlElement> GetAllElements(IEnumerable<HtmlElement> elements)
+        {
+            if (elements == null) throw new ArgumentNullException(nameof(IEnumerable<HtmlElement>));
+
+            var eleList = new List<HtmlElement>();
+            if (elements.Count() == 0) return eleList;
+
+            foreach(var rootElement in elements)
+            {
+                var allElements = GetElementAndDescendents(rootElement);
+                eleList.AddRange(allElements);
+
+            }
+
+            return eleList;
+            
         }
 
         public static List<HtmlElement> GetElementDescendents(HtmlElement source)
