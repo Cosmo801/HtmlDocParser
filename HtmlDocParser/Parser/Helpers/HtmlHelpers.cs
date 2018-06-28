@@ -13,36 +13,7 @@ namespace Cosmo.HtmlDocParser.Parser.Helpers
         static HtmlHelpers()
         {
             _config = new DebugHtmlConfig();
-        }
-
-        public static bool HasChildren(this HtmlElement htmlElement)
-        {
-
-            //Opening
-            var openPatternOne = new Regex("<");
-            var openPatternTwo = new Regex(">");
-
-            var openMatchOne = openPatternOne.Match(htmlElement.InnerText);
-            if (!openMatchOne.Success) return false;
-
-            var openMatchTwo = openPatternTwo.Match(htmlElement.InnerText);
-            if (!openMatchTwo.Success) return false;
-
-            //Get Result
-            var openIndexCount = (openMatchTwo.Index -1 ) - (openMatchOne.Index );
-            var openingTag = htmlElement.InnerText.Substring(openMatchOne.Index + 1, openIndexCount);
-
-            
-
-            var htmlName = openingTag.Split(null).Where(o => o != string.Empty).First();
-
-            var closePattern = $@"</{htmlName}>";
-            var closeRegex = new Regex(closePattern);
-
-            var closeMatch = closeRegex.Match(htmlElement.InnerText);
-
-            return closeMatch.Success;
-        }
+        }      
 
         public static bool IsHtmlElement(string element)
         {

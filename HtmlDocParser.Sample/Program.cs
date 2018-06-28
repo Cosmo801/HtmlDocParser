@@ -25,7 +25,9 @@ namespace HtmlDocParser.Sample
             //multi selectors are doing repeated calls to HtmlHelpers.GetAllElements() fix it
 
             //apple works
-            var test = reader.ParseDocumentFromPath("https://www.apple.com/au/");
+            //twitch throws exception because something isnt being removed from doctext
+            //youtube works but performance is very bad
+            var test = reader.ParseDocumentFromPath("https://www.youtube.com/");
 
             var links = test.GetElementBySelector("head > title");
            

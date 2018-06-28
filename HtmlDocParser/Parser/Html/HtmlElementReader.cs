@@ -221,10 +221,11 @@ namespace Cosmo.HtmlDocParser.Parser.Html
         {
             //get the corresponding closing somehow
 
-            
+           
 
-            var closingMatches = new Regex($"</{opening.ElementName}>").Matches(text);
-            var childOpenMatches = new Regex($"<{opening.ElementName}").Matches(text.Skip(opening.OpeningTagOpenIndex + 1).CharsToString());
+
+            var closingMatches = new Regex($@"<\s*/\s*{opening.ElementName}\s*>").Matches(text);
+            var childOpenMatches = new Regex($@"<\s*{opening.ElementName}").Matches(text.Skip(opening.OpeningTagOpenIndex + 1).CharsToString());
 
             if (closingMatches.Count == 0) return new HtmlElementCloseGetResult { Success = false };
             if (childOpenMatches.Count == 0) return new HtmlElementCloseGetResult
